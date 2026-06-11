@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { Button } from "@/components/ui/button";
 import {
   BarChart3,
@@ -37,7 +37,7 @@ function LandingPage() {
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    mockBackend.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
   }, []);
 
   return (

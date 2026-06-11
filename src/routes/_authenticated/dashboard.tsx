@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,7 @@ function Dashboard() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("projects")
         .select("id, name, description, updated_at, data_sources(id, file_name, row_count)")
         .order("updated_at", { ascending: false });
@@ -35,9 +35,9 @@ function Dashboard() {
 
   const create = useMutation({
     mutationFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await mockBackend.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("projects")
         .insert({ name: name.trim(), description: desc.trim() || null, user_id: u.user.id })
         .select("id")

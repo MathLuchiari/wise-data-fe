@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { mockBackend } from "@/integrations/mock/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    mockBackend.auth.getSession().then(({ data }) => {
       if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
@@ -28,14 +27,14 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "sign-up") {
-        const { error } = await supabase.auth.signUp({
+        const { error } = await mockBackend.auth.signUp({
           email, password,
           options: { emailRedirectTo: `${window.location.origin}/dashboard` },
         });
         if (error) throw error;
         toast.success("Conta criada. Você já está conectado.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await mockBackend.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
       navigate({ to: "/dashboard", replace: true });
@@ -48,9 +47,12 @@ function AuthPage() {
 
   async function handleGoogle() {
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) { toast.error(String(result.error)); setLoading(false); return; }
-    if (result.redirected) return;
+    const result = await mockBackend.auth.signInWithOAuth();
+    if (result.error) {
+      toast.error(String(result.error));
+      setLoading(false);
+      return;
+    }
     navigate({ to: "/dashboard", replace: true });
   }
 

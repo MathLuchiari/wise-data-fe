@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UploadPanel } from "@/features/project/upload-panel";
 import { SummaryPanel } from "@/features/project/summary-panel";
@@ -20,7 +20,7 @@ function ProjectPage() {
   const { data: project, isLoading } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("projects")
         .select("id, name, description")
         .eq("id", projectId)
@@ -33,7 +33,7 @@ function ProjectPage() {
   const { data: dataSource } = useQuery({
     queryKey: ["data_source", projectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("data_sources")
         .select("*")
         .eq("project_id", projectId)

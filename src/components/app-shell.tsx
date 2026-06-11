@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BarChart3, LayoutDashboard, LogOut, Sparkles } from "lucide-react";
 import { ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "./ui/button";
 
@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: projects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("projects")
         .select("id, name, updated_at")
         .order("updated_at", { ascending: false })
@@ -25,13 +25,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const { data: user } = useQuery({
     queryKey: ["user"],
-    queryFn: async () => (await supabase.auth.getUser()).data.user,
+    queryFn: async () => (await mockBackend.auth.getUser()).data.user,
   });
 
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
-    await supabase.auth.signOut();
+    await mockBackend.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
 

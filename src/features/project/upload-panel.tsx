@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { parseFile } from "@/lib/sheet-parser";
 import { Upload, FileSpreadsheet, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,18 +23,18 @@ export function UploadPanel({ projectId, existing }: { projectId: string; existi
       if (parsed.rowCount === 0) throw new Error("Planilha vazia.");
 
       setProgress("Enviando arquivo…");
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await mockBackend.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
       const path = `${u.user.id}/${projectId}/${Date.now()}-${file.name}`;
-      const { error: upErr } = await supabase.storage.from("spreadsheets").upload(path, file);
+      const { error: upErr } = await mockBackend.storage.from("spreadsheets").upload(path, file);
       if (upErr) throw upErr;
 
       setProgress("Salvando metadados…");
       // delete previous data_sources for this project (simple v1)
-      await supabase.from("data_sources").delete().eq("project_id", projectId);
+      await mockBackend.from("data_sources").delete().eq("project_id", projectId);
 
       const sample = parsed.rows.slice(0, 50);
-      const { error: dbErr } = await supabase.from("data_sources").insert({
+      const { error: dbErr } = await mockBackend.from("data_sources").insert({
         project_id: projectId,
         user_id: u.user.id,
         file_name: file.name,
@@ -47,7 +47,7 @@ export function UploadPanel({ projectId, existing }: { projectId: string; existi
       });
       if (dbErr) throw dbErr;
 
-      await supabase.from("projects").update({ updated_at: new Date().toISOString() }).eq("id", projectId);
+      await mockBackend.from("projects").update({ updated_at: new Date().toISOString() }).eq("id", projectId);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["data_source", projectId] });

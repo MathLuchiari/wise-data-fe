@@ -1,1 +1,0 @@
-ALTER TABLE public.saved_kpis ADD COLUMN IF NOT EXISTS chart_spec jsonb;

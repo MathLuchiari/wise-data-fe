@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Bookmark, Send, Sparkles, User } from "lucide-react";
@@ -32,7 +32,7 @@ export function ChatPanel({ projectId, dataSource }: { projectId: string; dataSo
   const { data: history } = useQuery({
     queryKey: ["messages", projectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("chat_messages")
         .select("id, role, content")
         .eq("project_id", projectId)
@@ -48,10 +48,10 @@ export function ChatPanel({ projectId, dataSource }: { projectId: string; dataSo
 
   const send = useMutation({
     mutationFn: async (text: string) => {
-      const { data: u } = await supabase.auth.getUser();
+      const { data: u } = await mockBackend.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
 
-      const { data: userMsg, error: userErr } = await supabase
+      const { data: userMsg, error: userErr } = await mockBackend
         .from("chat_messages")
         .insert({ project_id: projectId, user_id: u.user.id, role: "user", content: text })
         .select("id, role, content")
@@ -97,7 +97,7 @@ export function ChatPanel({ projectId, dataSource }: { projectId: string; dataSo
         setStreamBuffer(full);
       }
 
-      const { data: asstMsg } = await supabase
+      const { data: asstMsg } = await mockBackend
         .from("chat_messages")
         .insert({ project_id: projectId, user_id: u.user.id, role: "assistant", content: full })
         .select("id, role, content")
@@ -208,9 +208,9 @@ function MessageBubble({ message, streaming, projectId }: { message: Message; st
     const title = window.prompt("Título do KPI", defaultTitle);
     if (!title) return;
     const value = chartSpec ? "📊" : window.prompt("Valor principal", "—") ?? "—";
-    const { data: u } = await supabase.auth.getUser();
+    const { data: u } = await mockBackend.auth.getUser();
     if (!u.user) return;
-    const { error } = await supabase.from("saved_kpis").insert({
+    const { error } = await mockBackend.from("saved_kpis").insert({
       project_id: projectId,
       user_id: u.user.id,
       title,

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { mockBackend } from "@/integrations/mock/client";
 import { Bookmark, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { ChartRenderer, isChartSpec } from "./chart-renderer";
@@ -9,7 +9,7 @@ export function KpisPanel({ projectId }: { projectId: string }) {
   const { data: kpis, isLoading } = useQuery({
     queryKey: ["kpis", projectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await mockBackend
         .from("saved_kpis")
         .select("*")
         .eq("project_id", projectId)
@@ -21,7 +21,7 @@ export function KpisPanel({ projectId }: { projectId: string }) {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("saved_kpis").delete().eq("id", id);
+      const { error } = await mockBackend.from("saved_kpis").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
